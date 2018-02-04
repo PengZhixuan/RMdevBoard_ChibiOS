@@ -101,6 +101,29 @@ void cmd_test(BaseSequentialStream * chp, int argc, char *argv[])
   chprintf(chp,"IMU Pitch: %f\r\n",PIMU->euler_angle[Pitch]);
 }
 
+#ifdef MAVLINK_COMM_TEST
+void cmd_mavlink(BaseSequentialStream * chp, int argc, char *argv[])
+{
+  (void) argc,argv;
+
+  mavlinkComm_t* comm = mavlinkComm_get();
+  mavlink_heartbeat_t* heartbeat = mavlinkComm_heartbeat_subscribe();
+
+  systime_t start_time = chVTGetSystemTimeX();
+
+  mavlinkComm_test();
+  chThdSleepSeconds(1);
+  chprintf(chp,"custom_mode:%d\r\n",heartbeat->custom_mode);
+  chprintf(chp,"type:%d\r\n",heartbeat->type);
+  chprintf(chp,"autopilot:%d\r\n",heartbeat->autopilot);
+  chprintf(chp,"base_mode:%d\r\n",heartbeat->base_mode);
+  chprintf(chp,"system_status:%d\r\n",heartbeat->system_status);
+  chprintf(chp,"mavlink_version:%d\r\n",heartbeat->mavlink_version);
+
+  chprintf(chp,"\r\nTransmission delay us: %d\r\n",ST2US(comm->end_time - start_time));
+}
+#endif
+
 /**
  * @brief Start the data tramsmission to matlab
  * @note caution of data flooding to the serial port
@@ -170,6 +193,9 @@ static const ShellCommand commands[] =
   {"test", cmd_test},
   {"data", cmd_data},
   {"cal", cmd_calibrate},
+  #ifdef MAVLINK_COMM_TEST
+    {"mavlink", cmd_mavlink},
+  #endif
   {NULL, NULL}
 };
 

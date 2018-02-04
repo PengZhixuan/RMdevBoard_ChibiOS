@@ -19,6 +19,8 @@
 #include "attitude.h"
 #include "calibrate_sensor.h"
 
+#include "mavlink_comm.h"
+
 #include "gimbal.h"
 
 #include "exti.h"

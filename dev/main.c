@@ -17,10 +17,10 @@
 
 static BaseSequentialStream* chp = (BaseSequentialStream*)&SDU1;
 static const IMUConfigStruct imu1_conf =
-  {&SPID5, MPU6500_ACCEL_SCALE_8G, MPU6500_GYRO_SCALE_1000, MPU6500_AXIS_REV_Z};
+  {&SPID5, MPU6500_ACCEL_SCALE_8G, MPU6500_GYRO_SCALE_250, MPU6500_AXIS_REV_Z};
 
 static const magConfigStruct mag1_conf =
-  {IST8310_ADDR_FLOATING, 200, IST8310_AXIS_REV_NO};
+        {IST8310_ADDR_FLOATING, 200, IST8310_AXIS_REV_NO};
 
 PIMUStruct pIMU;
 
@@ -62,7 +62,14 @@ static THD_FUNCTION(Attitude_thread, p)
   }
 }
 
-
+mavlink_heartbeat_t packet_test = {
+  963497464,
+  17,
+  84,
+  151,
+  218,
+  3
+};
 
 /*
  * Application entry point.
@@ -87,13 +94,19 @@ int main(void) {
 
 
   shellStart();
-  params_init();
+  mavlinkComm_init();
+//  params_init();
   can_processInit();
   RC_init();
-  gimbal_init();
-
+//  gimbal_init();
+//  gimbal_sys_iden_init();
+//  pwm_shooter_init();
   extiinit();
+//  judgeinit();
+//  tempControllerInit();
 
+  mavlinkComm_heartbeat_publish(&packet_test, 100);
+  mavlink_heartbeat_t* mavlink_rx = mavlinkComm_heartbeat_subscribe();
 
   //tft_init(TFT_HORIZONTAL, CYAN, YELLOW, BLACK);
 
@@ -103,8 +116,16 @@ int main(void) {
   NORMALPRIO + 5,
                     Attitude_thread, NULL);
 
+
+
   while (true)
   {
+    chprintf(chp,"custom_mode:%d\r\n",mavlink_rx->custom_mode);
+    chprintf(chp,"type:%d\r\n",mavlink_rx->type);
+    chprintf(chp,"autopilot:%d\r\n",mavlink_rx->autopilot);
+    chprintf(chp,"base_mode:%d\r\n",mavlink_rx->base_mode);
+    chprintf(chp,"system_status:%d\r\n",mavlink_rx->system_status);
+    chprintf(chp,"mavlink_version:%d\r\n\n",mavlink_rx->mavlink_version);
 
     chThdSleepMilliseconds(500);
 

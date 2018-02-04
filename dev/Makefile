@@ -126,7 +126,7 @@ CSRC = $(STARTUPSRC) \
        main.c shellcfg.c flash.c tft_display.c \
 			 mpu6500.c attitude.c ist8310.c math_misc.c \
 			 canBusProcess.c dbus.c gimbal.c params.c usbcfg.c \
-			 calibrate_sensor.c exti.c
+			 calibrate_sensor.c exti.c mavlink_comm.c mavlink_topic.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -160,7 +160,8 @@ INCDIR = $(STARTUPINC) $(KERNINC) $(PORTINC) $(OSALINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) $(TESTINC) \
          $(CHIBIOS)/os/various \
 				 $(CHIBIOS)/os/hal/lib/streams \
-				 inc -lm
+				 inc -lm \
+				 $(CHIBIOS)/mavlink
 
 ##define SERIAL_CMD       &SDU1
 #define SERIAL_DATA      &SDU1
