@@ -1,7 +1,7 @@
 #ifndef _PARAMS_H_
 #define _PARAMS_H_
 
-#define PARAMS_VERSION "1.3"
+#define PARAMS_VERSION "1.3.01"
 
 //#define PARAMS_USE_UART
 #define PARAMS_USE_USB
@@ -12,16 +12,16 @@
 #endif
 
 #ifdef PARAMS_USE_UART
-  #define UART_PARAMS &UARTD2
+  #define UART_PARAMS &UARTD3
   #define PARAMS_BR 115200
 #elif defined(PARAMS_USE_USB)
   /*
   You need to add these items to shellcfg.c & Shellcommand commands[]
   #ifdef PARAMS_USE_USB
-    {"/xFE",cmd_param_rx},
     {"/xFD",cmd_param_scale},
     {"/xFB",cmd_param_update},
     {"/xFA",cmd_param_tx},
+    {"/xF9",cmd_param_rx},
   #endif
   */
   void cmd_param_rx(BaseSequentialStream * chp, int argc, char *argv[]);

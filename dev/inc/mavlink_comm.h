@@ -1,7 +1,7 @@
 #ifndef _MAVLINK_CONF_H_
 #define _MAVLINK_CONF_H_
 
-/* ENTERPRIZE MAVlink transeiver V1.0 (Prototype)
+/* ENTERPRIZE MAVlink transeiver V1.0.01
   Use instruction:
     Read message from topic:
       mavlink_type_t* message = mavlinkComm_type_subscribe(void);

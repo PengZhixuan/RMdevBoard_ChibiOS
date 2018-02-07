@@ -94,7 +94,7 @@ int main(void) {
 
 
   shellStart();
-  mavlinkComm_init();
+//  mavlinkComm_init();
   params_init();
   can_processInit();
   RC_init();
@@ -105,8 +105,8 @@ int main(void) {
 //  judgeinit();
 //  tempControllerInit();
 
-  mavlinkComm_heartbeat_publish(&packet_test, 100);
-  mavlink_heartbeat_t* mavlink_rx = mavlinkComm_heartbeat_subscribe();
+//  mavlinkComm_heartbeat_publish(&packet_test, 100);
+//  mavlink_heartbeat_t* mavlink_rx = mavlinkComm_heartbeat_subscribe();
 
   //tft_init(TFT_HORIZONTAL, CYAN, YELLOW, BLACK);
 
@@ -120,14 +120,14 @@ int main(void) {
 
   while (true)
   {
-
+/*
     chprintf(chp,"custom_mode:%d\r\n",mavlink_rx->custom_mode);
     chprintf(chp,"type:%d\r\n",mavlink_rx->type);
     chprintf(chp,"autopilot:%d\r\n",mavlink_rx->autopilot);
     chprintf(chp,"base_mode:%d\r\n",mavlink_rx->base_mode);
     chprintf(chp,"system_status:%d\r\n",mavlink_rx->system_status);
     chprintf(chp,"mavlink_version:%d\r\n\n",mavlink_rx->mavlink_version);
-    
+    */
     chThdSleepMilliseconds(500);
 
   }

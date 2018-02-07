@@ -7,8 +7,18 @@
 #include "shell.h"
 #include <string.h>
 
-#define SERIAL_CMD       &SDU1
-#define SERIAL_DATA      &SDU1
+#define SHELL_USE_USB
+
+#if !defined(SHELL_USE_USB)
+  #define SHELL_SERIAL_UART &SD3
+
+  static const SerialConfig shell_serial_conf = {
+  115200,               //Baud Rate
+  0,         //CR1 Register
+  0,      //CR2 Register
+  0                     //CR3 Register
+};
+#endif
 
 static thread_t* matlab_thread_handler = NULL;
 /**
@@ -54,7 +64,7 @@ static THD_FUNCTION(matlab_thread, p)
 
   int32_t txbuf_d[16];
   float txbuf_f[16];
-  BaseSequentialStream* chp = (BaseSequentialStream*)SERIAL_DATA;
+  BaseSequentialStream* chp = (BaseSequentialStream*)&SDU1;
 
   PIMUStruct PIMU = imu_get();
   GimbalStruct* gimbal = gimbal_get();
@@ -222,17 +232,17 @@ static const ShellCommand commands[] =
     {"mavlink", cmd_mavlink},
   #endif
   #ifdef PARAMS_USE_USB
-    {"\xFE",cmd_param_rx},
     {"\xFD",cmd_param_scale},
     {"\xFB",cmd_param_update},
     {"\xFA",cmd_param_tx},
+    {"\xF9",cmd_param_rx},
   #endif
   {NULL, NULL}
 };
 
 static const ShellConfig shell_cfg1 =
 {
-  (BaseSequentialStream *)SERIAL_CMD,
+  (BaseSequentialStream *)&SDU1,
   commands
 };
 
@@ -245,12 +255,12 @@ static const ShellConfig shell_cfg1 =
  */
 void shellStart(void)
 {
-  //sdStart(SERIAL_CMD, NULL);
   /*
    * Initializes a serial-over-USB CDC driver.
    */
-  sduObjectInit(&SDU1);
-  sduStart(&SDU1, &serusbcfg);
+  #ifdef SHELL_USE_USB
+    sduObjectInit(&SDU1);
+    sduStart(&SDU1, &serusbcfg);
 
   /*
    * Activates the USB driver and then the USB bus pull-up on D+.
@@ -259,11 +269,14 @@ void shellStart(void)
    */
 
 
-  usbDisconnectBus(serusbcfg.usbp);
-  chThdSleepMilliseconds(1500);
+   usbDisconnectBus(serusbcfg.usbp);
+   chThdSleepMilliseconds(1500);
 
-  usbStart(serusbcfg.usbp, &usbcfg);
-  usbConnectBus(serusbcfg.usbp);
+   usbStart(serusbcfg.usbp, &usbcfg);
+   usbConnectBus(serusbcfg.usbp);
+  #else
+    sdStart(SHELL_SERIAL_UART, shell_serial_conf);
+  #endif
 
   shellInit();
 

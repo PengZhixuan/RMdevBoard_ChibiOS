@@ -459,9 +459,9 @@ void gimbal_init(void)
 
   gimbal_encoderUpdate();
 
-  params_set(gimbal.axis_init_pos,  5, 3, init_pos_name,  subname_axis,    PARAM_PUBLIC);
-  params_set(gimbal.axis_ff_weight, 2, 6, axis_ff_name,   subname_ff,      PARAM_PUBLIC);
-  params_set(gimbal.axis_ff_accel,  6, 6, accl_name,      subname_accl,    PARAM_PUBLIC);
+  params_set(gimbal.axis_init_pos,  5, 3, init_pos_name,  subname_axis,    PARAM_PRIVATE);
+  params_set(gimbal.axis_ff_weight, 2, 6, axis_ff_name,   subname_ff,      PARAM_PRIVATE);
+  params_set(gimbal.axis_ff_accel,  6, 6, accl_name,      subname_accl,    PARAM_PRIVATE);
 
   chThdCreateStatic(gimbal_init_thread_wa, sizeof(gimbal_init_thread_wa),
                     NORMALPRIO - 5, gimbal_init_thread, NULL);
