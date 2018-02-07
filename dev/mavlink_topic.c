@@ -12,6 +12,15 @@ static systime_t tx_end = 0; //Estimated end_of_transmission time, used to preve
 #if (MAVLINK_USE_HEARTBEAT == TRUE) && !defined(__DOXYGEN__)
   static mavlink_heartbeat_t* heartbeat_tx = NULL;
   static THD_WORKING_AREA(heartbeat_tx_wa, 512);
+  static mavlink_heartbeat_t heartbeat;
+  static bool heartbeat_subscribed = false;
+
+  mavlink_heartbeat_t* mavlinkComm_heartbeat_subscribe(void)
+  {
+    heartbeat_subscribed = true;
+    return &heartbeat;
+  }
+
   static THD_FUNCTION(heartbeat_tx_func, p)
   {
     uint16_t freq = *(uint16_t*)p;
@@ -64,3 +73,22 @@ static systime_t tx_end = 0; //Estimated end_of_transmission time, used to preve
   }
 #endif
 /**/
+
+inline void _mavlinkComm_topic_decode(mavlink_message_t* const message)
+{
+  switch(message->msgid)
+  {
+    case MAVLINK_MSG_ID_HEARTBEAT:
+    {
+      #if (MAVLINK_USE_HEARTBEAT == TRUE) && !defined(__DOXYGEN__)
+        if(heartbeat_subscribed)
+        {
+          chSysLock();
+          mavlink_msg_heartbeat_decode(message, &heartbeat);
+          chSysUnlock();
+        }
+      #endif
+      break;
+    }
+  }
+}

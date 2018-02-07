@@ -3,25 +3,29 @@
 
 /* ENTERPRIZE MAVlink transeiver V1.0 (Prototype)
   Use instruction:
-  Read message:
-    mavlink_type_t* message = mavlinkComm_type_subscribe(void);
+    Read message from topic:
+      mavlink_type_t* message = mavlinkComm_type_subscribe(void);
 
-    chSysLock()
-    data0 = message->data0
-    data1 = message->data1
-    ...
-    chSysUnlock()
+      chSysLock();
+      data0 = message->data0;
+      data1 = message->data1;
+      ...
+      chSysUnlock();
 
-  Write message to transmit:
+    Write message to transmit topic:
 
-    mavlink_type_t message;
-    mavlinkComm_type_publish(&message, transmit_freq);
+      mavlink_type_t message;
+      mavlinkComm_type_publish(&message, transmit_freq);
 
-    chSysLock()
-    message.data0 = data0
-    message.data1 = data1
-    ...
-    chSysUnlock()
+      chSysLock();
+      message.data0 = data0;
+      message.data1 = data1;
+      ...
+      chSysUnlock();
+
+    Develop instruction:
+      1. import new mavlink message type header file
+      2. modify mavlink_comm.h and mavlink_topic.c individually and ONLY
 */
 
 /*  Define which topic you need here*/
@@ -68,5 +72,8 @@ typedef enum{
   mavlinkComm_publish_result_t mavlinkComm_heartbeat_publish(mavlink_heartbeat_t* const message,
     const uint16_t transmit_freq);
 #endif
+
+/* This function is private*/
+inline void _mavlinkComm_topic_decode(mavlink_message_t* const message);
 
 #endif

@@ -7,20 +7,7 @@
 
 mavlinkComm_t comm;
 static thread_reference_t mavlink_receive_thread_handler = NULL;
-static uint8_t rxbuf[263];
-
-/* definitions of mavlink messages*/
-#if (MAVLINK_USE_HEARTBEAT == TRUE) && !defined(__DOXYGEN__)
-    static mavlink_heartbeat_t heartbeat;
-    static bool heartbeat_subscribed = false;
-
-    mavlink_heartbeat_t* mavlinkComm_heartbeat_subscribe(void)
-    {
-      heartbeat_subscribed = true;
-      return &heartbeat;
-    }
-#endif
-/**/
+static uint8_t rxbuf[MAVLINK_MAX_PACKET_LEN];
 
 mavlinkComm_t* mavlinkComm_get(void)
 {
@@ -88,6 +75,9 @@ static THD_FUNCTION(mavlink_rx, p)
     while(!rxbuf[1])
       chThdSleepMicroseconds(100);
 
+    if(rxbuf[1] > MAVLINK_MAX_PAYLOAD_LEN)
+      rxbuf[1] = MAVLINK_MAX_PAYLOAD_LEN;
+
     systime_t end_time = comm.start_time + US2ST((rxbuf[1] + 8)*1e7/UART_MAVLINK_BR) + 20;
     /*
       Transimission time estimation: bytes to transfer *
@@ -97,9 +87,7 @@ static THD_FUNCTION(mavlink_rx, p)
     if(end_time > chVTGetSystemTimeX())
       chThdSleepUntil(end_time);
 
-    rx_message.magic = rxbuf[0];
-
-    uint8_t i = 1;
+    uint8_t i = 0;
     do{
       comm.status.msg_received = mavlink_frame_char_buffer(&rx_message,
                                                         &rx_status,
@@ -109,28 +97,12 @@ static THD_FUNCTION(mavlink_rx, p)
     }while(comm.status.msg_received == MAVLINK_FRAMING_INCOMPLETE);
 
     uartStopReceive(UART_MAVLINK);
-    uartStartReceive(UART_MAVLINK, 263, rxbuf);
+    uartStartReceive(UART_MAVLINK, MAVLINK_MAX_PACKET_LEN, rxbuf);
     (*UART_MAVLINK).usart->CR1 |= USART_CR1_RXNEIE;
     rxbuf[0] = rxbuf[1] = 0;
 
     if(comm.status.msg_received == MAVLINK_FRAMING_OK)
-    {
-      switch(comm.rx_message.msgid)
-      {
-        case MAVLINK_MSG_ID_HEARTBEAT:
-        { 20;
-          #if (MAVLINK_USE_HEARTBEAT == TRUE) && !defined(__DOXYGEN__)
-            if(heartbeat_subscribed)
-            {
-              chSysLock();
-              mavlink_msg_heartbeat_decode(&comm.rx_message, &heartbeat);
-              chSysUnlock();
-            }
-          #endif
-          break;
-        }
-      }
-    }
+      _mavlinkComm_topic_decode(&comm.rx_message);
 
     #ifdef MAVLINK_COMM_TEST
       comm.end_time = chVTGetSystemTimeX();
@@ -145,7 +117,7 @@ void mavlinkComm_init(void)
   uartStart(UART_MAVLINK, &uart_cfg);
 
   uartStopReceive(UART_MAVLINK);
-  uartStartReceive(UART_MAVLINK, 263, rxbuf);
+  uartStartReceive(UART_MAVLINK, MAVLINK_MAX_PACKET_LEN, rxbuf);
   (*UART_MAVLINK).usart->CR1 |= USART_CR1_RXNEIE;
 
   chThdCreateStatic(mavlink_rx_wa, sizeof(mavlink_rx_wa), NORMALPRIO, mavlink_rx ,NULL);
@@ -168,11 +140,11 @@ void mavlinkComm_test(void)
   uint8_t buf[buf_len];
 
   mavlink_msg_heartbeat_pack(0, 200, &message,
-          heartbeat_tx->type,
-          heartbeat_tx->autopilot,
-          heartbeat_tx->base_mode,
-          heartbeat_tx->custom_mode,
-          heartbeat_tx->system_status);
+          packet_test.type,
+          packet_test.autopilot,
+          packet_test.base_mode,
+          packet_test.custom_mode,
+          packet_test.system_status);
 
   mavlink_msg_to_send_buffer(buf, &message);
   uartStartSend(UART_MAVLINK, buf_len, buf);

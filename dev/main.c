@@ -95,10 +95,10 @@ int main(void) {
 
   shellStart();
   mavlinkComm_init();
-//  params_init();
+  params_init();
   can_processInit();
   RC_init();
-//  gimbal_init();
+  gimbal_init();
 //  gimbal_sys_iden_init();
 //  pwm_shooter_init();
   extiinit();
@@ -120,13 +120,14 @@ int main(void) {
 
   while (true)
   {
+
     chprintf(chp,"custom_mode:%d\r\n",mavlink_rx->custom_mode);
     chprintf(chp,"type:%d\r\n",mavlink_rx->type);
     chprintf(chp,"autopilot:%d\r\n",mavlink_rx->autopilot);
     chprintf(chp,"base_mode:%d\r\n",mavlink_rx->base_mode);
     chprintf(chp,"system_status:%d\r\n",mavlink_rx->system_status);
     chprintf(chp,"mavlink_version:%d\r\n\n",mavlink_rx->mavlink_version);
-
+    
     chThdSleepMilliseconds(500);
 
   }
