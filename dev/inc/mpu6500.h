@@ -74,7 +74,7 @@ typedef enum {
 #define MPU6500_I2C_MSTR_REG_DIS     0x20
 #define MPU6500_I2C_MSTR_GRP         0x10
 
-#define MPU6500_SPI_READ             0x80
+#define MPU6500_SPI_READ             0x80   //128
 #define MPU6500_I2C_MSTR_READ        0x80
 
 #define MPU6500_EXT_SENS_DATA        0x49
@@ -141,7 +141,7 @@ typedef struct tagIMUStruct {
   SPIDriver* _imu_spi;
   uint8_t inited;
   uint32_t errorCode;
-  uint32_t _tprev;
+  uint32_t _tprev; // previous system ticks
   float dt;
   thread_reference_t imu_Thd;
 
