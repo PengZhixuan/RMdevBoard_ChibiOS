@@ -16,6 +16,10 @@ static volatile ChassisEncoder_canStruct chassis_encoder[CHASSIS_MOTOR_NUM];
 static volatile ChassisEncoder_canStruct extra_encoder[EXTRA_MOTOR_NUM];
 static volatile UWB_canStruct uwb[UWB_NUM];
 
+
+bool uwb_start = false;
+int uwb_index = 0;
+
 /*
  * 500KBaud, automatic wakeup, automatic recover
  * from abort mode.
@@ -50,7 +54,9 @@ volatile UWB_canStruct *can_getUWB(void) {
 
 static inline void can_process_uwb(volatile UWB_canStruct *uwb_pointer, const CANRxFrame *const rxmsg) {
     chSysLock();
-    uwb_pointer->lala = rxmsg->data64[0];
+    uwb_pointer->x_world_cm = (int16_t) rxmsg->data16[0];
+    uwb_pointer->y_world_cm = (int16_t) rxmsg->data16[1];
+    uwb_pointer->theta = rxmsg->data16[2];
     chSysUnlock();
 }
 
@@ -111,7 +117,20 @@ static void can_processEncoderMessage(CANDriver *const canp, const CANRxFrame *c
                 break;
 
             case UWB_MSG_ID:
-                can_process_uwb(&uwb[0], rxmsg);
+                if (rxmsg->DLC == 6 && !uwb_start) {
+                    uwb_start = true;
+                }
+                if (uwb_start) {
+                    if (rxmsg->DLC == 8) {
+                        uwb_index++;
+                    }
+                    if (rxmsg->DLC == 6) {
+                        uwb_index = 0;
+                    }
+                    if (uwb_index == 1) {
+                        can_process_uwb(&uwb[0], rxmsg);
+                    }
+                }
                 break;
         }
     }

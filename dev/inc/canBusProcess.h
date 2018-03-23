@@ -48,7 +48,9 @@ typedef struct {
 } ChassisEncoder_canStruct;
 
 typedef struct {
-    uint64_t lala;
+    int16_t x_world_cm;
+    int16_t y_world_cm;
+    uint16_t theta;
 } UWB_canStruct;
 
 volatile GimbalEncoder_canStruct *can_getGimbalMotor(void);

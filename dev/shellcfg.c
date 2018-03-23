@@ -101,7 +101,9 @@ void cmd_test(BaseSequentialStream *chp, int argc, char *argv[]) {
     chprintf(chp, "BL: %d\r\n", chassis[2].raw_speed);
     chprintf(chp, "BR: %d\r\n", chassis[3].raw_speed);
 
-    chprintf(chp,"0x%08x\r\n",hehe->lala);
+    chprintf(chp, "x:%d\r\n", hehe->x_world_cm);
+    chprintf(chp, "y:%d\r\n", hehe->y_world_cm);
+    chprintf(chp, "theta:%d\r\n", hehe->theta);
 
     //chprintf(chp,"Gimbal Pitch: %f\r\n",gimbal->pitch_angle);
     // chprintf(chp,"Gimbal Yaw: %f\r\n",gimbal->yaw_angle);
